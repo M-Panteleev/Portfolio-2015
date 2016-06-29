@@ -13,13 +13,13 @@ GO
 CREATE PROCEDURE dbo.UnionHeap
 (
    	--| Входные параметры:
-   	@cNameHeapIn  	 dbo.TagName = NULL, --| Название террикона(результата объединения).
-	@nMaterialIdIn	 INT = NULL,		 --| ID материала террикона(результата объединения).	
-	@nFractionIdIn	 INT = NULL,		 --| ID фракции террикона(результата объединения).
-	@nUnitIdIn		 INT = NULL,		 --| ID площадки на которой будет находится результирующий террикон.
-	@nOwnerIdIn		 INT = NULL,		 --| Цех-владелец террикона.
-	@cNoteIn		 dbo.TagDescr = NULL,--| Текст примечания к террикону.
-	@cHeapListIn  NVARCHAR(MAX) = '', --| Список GUID'ов объединяемых терриконов (текстом, через запятую).
+   	@cNameHeapIn  	 dbo.TagName = NULL,  --| Название террикона(результата объединения).
+	@nMaterialIdIn	 INT = NULL,	      --| ID материала террикона(результата объединения).	
+	@nFractionIdIn	 INT = NULL,	      --| ID фракции террикона(результата объединения).
+	@nUnitIdIn	 INT = NULL,	      --| ID площадки на которой будет находится результирующий террикон.
+	@nOwnerIdIn	 INT = NULL,	      --| Цех-владелец террикона.
+	@cNoteIn	 dbo.TagDescr = NULL, --| Текст примечания к террикону.
+	@cHeapListIn     NVARCHAR(MAX) = '',  --| Список GUID'ов объединяемых терриконов (текстом, через запятую).
 	
 	--| Выходные параметры:
 	@nChildGUID_OUT	 UNIQUEIDENTIFIER = NULL OUTPUT --| GUID террикона образованного в результате объединения.
@@ -28,13 +28,13 @@ AS
 BEGIN
 	BEGIN TRY
 		
-		DECLARE @nErrorCode INT = 0;				  --| Код ошибки.
-		DECLARE @cMes		NVARCHAR(MAX) = '';		  --| Текст ошибки.
-		DECLARE @cEnter		NVARCHAR(1)	  = CHAR(10); --| Символ перевода строки.
-		DECLARE @cDBName	NVARCHAR(10)  = DB_NAME();--| Название текущей БД. 
-		DECLARE @nIsLink	INT = 0;			      --| Статус, отвечает за место выполнения ХП:
-												      --|		@nIsLink = 1 - по линку на Главном Сервере;
-												      --|		@nIsLink = 0 – в текущей БД.
+		DECLARE @nErrorCode INT = 0;		       --| Код ошибки.
+		DECLARE @cMes	    NVARCHAR(MAX) = '';	       --| Текст ошибки.
+		DECLARE @cEnter	    NVARCHAR(1)   = CHAR(10);  --| Символ перевода строки.
+		DECLARE @cDBName    NVARCHAR(10)  = DB_NAME(); --| Название текущей БД. 
+		DECLARE @nIsLink    INT = 0;		       --| Статус, отвечает за место выполнения ХП:
+							       --|	@nIsLink = 1 - по линку на Главном Сервере;
+							       --|	@nIsLink = 0 – в текущей БД.
 		
 		--| Проверка входных параметров на NULL.
 		IF (@cNameHeapIn 	IS NULL) SET @cMes += N' - Не задано наименование террикона.' + @cEnter
@@ -97,14 +97,14 @@ BEGIN
 			--| Выполнение SQL запроса на linked-сервере с передачей параметров.
 			EXEC @SQLQuery 
 					--| Передача входных параметров:
-					@cNameHeapIn, 	 --| Название террикона.
-					@nMaterialIdIn,	 --| ID материала террикона.	
-					@nFractionIdIn,	 --| ID фракции террикона.
-					@nUnitIdIn,		 --| ID площадки на которой будет находится результирующий террикон.
-					@nOwnerIdIn,	 --| Цех-владелец террикона.
-					@cNoteIn,		 --| Текст примечания к террикону.
-					@cHeapListIn, 	 --| Список GUID'ов объединяемых терриконов (текстом, через запятую).
-									 --| Получение результата.
+					@cNameHeapIn, 	   --| Название террикона.
+					@nMaterialIdIn,	   --| ID материала террикона.	
+					@nFractionIdIn,	   --| ID фракции террикона.
+					@nUnitIdIn,	   --| ID площадки на которой будет находится результирующий террикон.
+					@nOwnerIdIn,	   --| Цех-владелец террикона.
+					@cNoteIn,	   --| Текст примечания к террикону.
+					@cHeapListIn, 	   --| Список GUID'ов объединяемых терриконов (текстом, через запятую).
+							   --| Получение результата.
 					@nChildGUID OUTPUT --| GUID террикона образованного в результате объединения.
 			
 			--| Если объединение терриконов на linked-сервере прошло корректно–результирующий террикон был создан, 
@@ -124,23 +124,23 @@ BEGIN
 			
 			--| Создаём террикон(результата объединения) в текущей БД.
 			EXEC dbo.AddHeap
-				@nUnitIdIn		= @nUnitIdIn,	
-				@nOwnerIdIn		= @nOwnerIdIn,
+				@nUnitIdIn	= @nUnitIdIn,	
+				@nOwnerIdIn	= @nOwnerIdIn,
 				@cNameHeapIn	= @cNameHeapIn,
 				@nMaterialIdIn	= @nMaterialIdIn,
 				@nFractionIdIn	= @nFractionIdIn,	
-				@cNoteIn		= @cNoteIn,
-				@nIsUnionIn		= 1		
+				@cNoteIn	= @cNoteIn,
+				@nIsUnionIn	= 1		
 
-			DECLARE @nHeapGUID 	  UNIQUEIDENTIFIER = NULL; --| GUID террикона.
-			DECLARE @nHeapId   	  INT			   = NULL; --| ID террикона.
-			DECLARE @nMaterialId  INT			   = NULL; --| ID материала террикона.
+			DECLARE @nHeapGUID   UNIQUEIDENTIFIER = NULL; --| GUID террикона.
+			DECLARE @nHeapId     INT = NULL;              --| ID террикона.
+			DECLARE @nMaterialId INT = NULL;              --| ID материала террикона.
 			
 			--| Получение параметров только-что созданного террикона.
 			SELECT 
-				@nHeapGUID 	  = nGUID,
-				@nHeapId	  = nHeapId,
-				@nMaterialId  = nMaterialId
+				@nHeapGUID   = nGUID,
+				@nHeapId     = nHeapId,
+				@nMaterialId = nMaterialId
 			FROM dbo.macHeap
 			WHERE(cNameHeap	   = @cNameHeapIn)
 			 AND (nUnitId	   = @nUnitIdIn)
@@ -162,17 +162,17 @@ BEGIN
 			IF (@cDBName != 'Core_db')
 			UPDATE dbo.macHeap SET
 				nChildGUID = @nHeapGUID, --| Ссылка на дочерний террикон, образованный в результате слияния.
-				dDateClose = GETDATE()		--| Дата закрытия террикона.
+				dDateClose = GETDATE()	 --| Дата закрытия террикона.
 			WHERE nGUID IN (SELECT nGUID FROM #tGUIDsTable_1)
 			
-			DECLARE @nHeapWeight		DECIMAL(9,3);  --| Здесь будет масса террикона - результата объединения.
+			DECLARE @nHeapWeight	 DECIMAL(9,3);  --| Здесь будет масса террикона - результата объединения.
 			DECLARE @cHeapValueProbe NVARCHAR(MAX); --| Здесь будет хим. анализ террикона - результата объединения.
 			
 			--| Расчёт веса и средневзвешенного хим. анализа террикона в результате объединения.
 			EXEC dbo.GetWeightAndChemAnalysisHeapUnion 
 				--| Передача входных параметров:
-				@cHeapListIn,				--| Список GUID'ов терриконов выбранных для объединения.
-				@nMaterialId,				--| ID материала террикона-результата объединения.
+				@cHeapListIn,		 --| Список GUID'ов терриконов выбранных для объединения.
+				@nMaterialId,		 --| ID материала террикона-результата объединения.
 				--| Получение результата.
 				@nHeapWeight	 OUTPUT, --| Расчётный вес террикона в результате объединения.
 				@cHeapValueProbe OUTPUT  --| Хим. анализ террикона в результате объединения.
@@ -183,7 +183,7 @@ BEGIN
 			
 			--| Обновление массы и хим. анализа террикона(результата объединения) в macHeap.
 			UPDATE dbo.macHeap SET
-				nWeight		= @nHeapWeight,	   --| Масса террикона в результате объединения.
+				nWeight	    = @nHeapWeight,    --| Масса террикона в результате объединения.
 				xValueProbe = @xHeapValueProbe --| Хим. анализ террикона в результате объединения.
 			WHERE nGUID = @nHeapGUID
 				
@@ -194,10 +194,10 @@ BEGIN
 			
 			--| Получение ID только-что созданной операции(необходимо для записи истории, см. ниже).
 			DECLARE @nHeapOperationId INT = (SELECT nHeapOperationId 
-												FROM dbo.macHeapOperation
-												WHERE (nHeapId = @nHeapId)
-												  AND (nWeight = @nHeapWeight)
-												  AND (dDateOperation  > DATEADD(MINUTE,-5,GETDATE())) )
+							 FROM dbo.macHeapOperation
+							 WHERE (nHeapId = @nHeapId)
+							   AND (nWeight = @nHeapWeight)
+							   AND (dDateOperation  > DATEADD(MINUTE,-5,GETDATE())) )
 			
 			--| Если операция не была найдена(создана) - генерируется исключение.
 			IF (@nHeapOperationId IS NULL)
@@ -225,6 +225,7 @@ BEGIN
 		END
 	END TRY
 	BEGIN CATCH
+		
 		IF XACT_STATE() <> 0
 		BEGIN
 			ROLLBACK TRANSACTION;
@@ -232,7 +233,6 @@ BEGIN
 		--| Удаление временной таблицы #tGUIDsTable_1.
 		IF OBJECT_ID(N'tempdb..#tGUIDsTable_1', N'U') IS NOT NULL 
 			DROP TABLE #tGUIDsTable_1
-		
 		
 		SET @cMes = N'В процессе объединения терриконов возникли ошибки:' + @cEnter + @cMes;
 					
@@ -252,8 +252,10 @@ BEGIN
 		EXEC dbo.int_Error_Return @cMes 
 		--> Процедура логирование ошибок
 		EXEC dbo.Log_Error @cMes
-		RETURN (50000 + ISNULL(ERROR_NUMBER(),0))	
+		RETURN (50000 + ISNULL(ERROR_NUMBER(),0))
+		
 	END CATCH
 
 END
 GO
+
