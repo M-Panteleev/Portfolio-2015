@@ -20,8 +20,8 @@ namespace otk_interunit
     /// </summary>
     /// <remarks>
     /// Автор: Родшелев С.А.
-    /// Ред: 				 Пантелеев М.Ю.
-    /// Дата: 				 28.05.2015г.
+    /// Ред: 		     Пантелеев М.Ю.
+    /// Дата: 		     28.05.2015г.
     /// </remarks>
     public partial class ProductHeapLog : UserControl, ISQLCore, IARMGroups
     {
@@ -81,25 +81,25 @@ namespace otk_interunit
                 //...
                 
 		// Добавил: Пантелеев М.Ю.
-                // Дата: 28.05.2015г.
+                // Дата:    28.05.2015г.
                 // united = true, если:
-		//	1)выбранный террикон;
-		//	2)образован в результате объединения.
+		//	1) выбранный террикон;
+		//	2) образован в результате объединения.
                 var united = selected && igMain.SelectedDataRow["nIsUnion"].Equals(true);
 
                 //...
                 
 		// Добавил: Пантелеев М.Ю.
-                // Дата: 28.05.2015г.
+                // Дата:    28.05.2015г.
                 // Кнопка "Объединение терриконов" доступна если: 
-		//	1)выбранный террикон; 
-		//	2)не закрыт.
+		//	1) выбранный террикон; 
+		//	2) не закрыт.
                 tsbUnion.Enabled = selected && !closed;
                 
 		// Кнопка "Отмена объединения терриконов" доступна если: 
-                // 	1)выбранный террикон;
-		// 	2)образованный в результате объединения; 
-		//	3)не закрыт.
+                // 	1) выбранный террикон;
+		// 	2) образованный в результате объединения; 
+		//	3) не закрыт.
                 tsbUndoUnion.Enabled = united && !closed;
             }
 
@@ -112,13 +112,13 @@ namespace otk_interunit
             /// </summary>
             /// <remarks>
             /// Автор: Пантелеев М.Ю.
-            /// Дата: 28.05.2015г.
+            /// Дата:  28.05.2015г.
             /// </remarks>
             private void UnionHeap()
             {
 		try
 		{
-			using (var dlg = new ProductHeapUnionDialog())// Создание экземпляра окна "Объединение терриконов".
+			using (var dlg = new ProductHeapUnionDialog()) // Создание экземпляра окна "Объединение терриконов".
 			{
 				var row = igMain.SelectedDataRow;
 				
@@ -165,11 +165,11 @@ namespace otk_interunit
 						{       
 							spc.ExecuteNonQuery("UnionHeap",
 								"cNameHeapIn", dlg.NameHeap, SqlDbType.NVarChar, // Название террикона(результата объединения).
-								"nMaterialIdIn", dlg.MaterialId, SqlDbType.Int,// ID материала террикона(результата объединения).
-								"nFractionIdIn", dlg.FractionId, SqlDbType.Int,// ID фракции террикона(результата объединения).
+								"nMaterialIdIn", dlg.MaterialId, SqlDbType.Int,  // ID материала террикона(результата объединения).
+								"nFractionIdIn", dlg.FractionId, SqlDbType.Int,  // ID фракции террикона(результата объединения).
 								"nUnitIdIn", dlg.PlaceId, SqlDbType.Int,  // ID площадки на которой будет находится результирующий террикон.
 								"nOwnerIdIn", dlg.OwnerId, SqlDbType.Int, // Цех-владелец террикона.
-								"cNoteIn", dlg.Note, SqlDbType.NVarChar, // Текст примечания к террикону.
+								"cNoteIn", dlg.Note, SqlDbType.NVarChar,  // Текст примечания к террикону.
 								"cHeapListIn", dlg.cHeapGUIDList, SqlDbType.NVarChar); // Список GUID'ов объединяемых терриконов (текстом, через запятую). 
 						},
 						"Ошибка объединения терриконов.",
