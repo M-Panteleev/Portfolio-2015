@@ -225,19 +225,19 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 
-		--| Удаление временных таблиц #tData_1, #tGUIDsTable_2.
-		IF OBJECT_ID(N'tempdb..#tData_1', N'U') IS NOT NULL 
-			DROP TABLE #tData_1	
-		IF OBJECT_ID(N'tempdb..#tGUIDsTable_2', N'U') IS NOT NULL 
-				DROP TABLE #tGUIDsTable_2
-		
-		DECLARE @cUserErrMessage NVARCHAR(200) = Char(10) + 'Ошибка в процедуре "GetWeightAndChemAnalysisHeapUnion" (сервер.:"' + @@servername + '", БД:"' + DB_NAME() + '"). ' + char(10)
-		
-		--> Процедура для возвращения исходных сведений об ошибке вызывающему приложению или пакету.
-		EXEC dbo.int_Error_Return @cUserErrMessage 
-		--> Процедура логирование ошибок
-		EXEC dbo.Log_Error @cUserErrMessage
-		RETURN (50000 + ISNULL(ERROR_NUMBER(),0))
+	--| Удаление временных таблиц #tData_1, #tGUIDsTable_2.
+	IF OBJECT_ID(N'tempdb..#tData_1', N'U') IS NOT NULL 
+		DROP TABLE #tData_1	
+	IF OBJECT_ID(N'tempdb..#tGUIDsTable_2', N'U') IS NOT NULL 
+			DROP TABLE #tGUIDsTable_2
+	
+	DECLARE @cUserErrMessage NVARCHAR(200) = Char(10) + 'Ошибка в процедуре "GetWeightAndChemAnalysisHeapUnion" (сервер.:"' + @@servername + '", БД:"' + DB_NAME() + '"). ' + char(10)
+	
+	--> Процедура для возвращения исходных сведений об ошибке вызывающему приложению или пакету.
+	EXEC dbo.int_Error_Return @cUserErrMessage 
+	--> Процедура логирование ошибок
+	EXEC dbo.Log_Error @cUserErrMessage
+	RETURN (50000 + ISNULL(ERROR_NUMBER(),0))
 		
 END CATCH							
 GO
