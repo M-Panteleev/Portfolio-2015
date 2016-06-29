@@ -8,14 +8,14 @@ GO
 --> террикона образованного в результате объединения.
 --> 
 --> Входные параметры:
--->  - @cHeapListIn			--| Таблица GUID'ов терриконов участвующих в объединении.
--->  - @nMaterialIdIn		--| ID материала террикона - результата объединения.
+-->  - @cHeapListIn	    --| Таблица GUID'ов терриконов участвующих в объединении.
+-->  - @nMaterialIdIn	    --| ID материала террикона - результата объединения.
 -->
 --> Выходные параметры:
--->  - @nHeapWeightOUT		--| Масса террикона - результата объединения, рассчитанная исходя 
---> 						--| из масс входных терриконов.
--->  - @xHeapValueProbeOUT	--| Хим. анализ террикона рассчитанный исходя из хим. анализов 
---> 						--| входных терриконов.
+-->  - @nHeapWeightOUT	    --| Масса террикона - результата объединения, рассчитанная исходя 
+--> 			    --| из масс входных терриконов.
+-->  - @xHeapValueProbeOUT  --| Хим. анализ террикона рассчитанный исходя из хим. анализов 
+--> 			    --| входных терриконов.
 -->  
 --> Автор: Пантелеев М.Ю.
 --> Дата:  28.05.2015г.
@@ -23,11 +23,11 @@ GO
 CREATE PROCEDURE dbo.GetWeightAndChemAnalysisHeapUnion
 ( 
 	--| Входные параметры:
-	@cHeapListIn		 NVARCHAR(MAX) = NULL,		  --| Список GUID'ов терриконов выбранных для объединения.
-	@nMaterialIdIn		 INT = NULL,				  --| ID материала террикона - результата объединения.
+	@cHeapListIn		 NVARCHAR(MAX) = NULL,	      --| Список GUID'ов терриконов выбранных для объединения.
+	@nMaterialIdIn		 INT = NULL,		      --| ID материала террикона - результата объединения.
 	--| Выходные параметры:	
-	@nHeapWeightOUT	 DECIMAL(9,3)  = NULL OUTPUT, --| Масса террикона - результата объединения.
-	@xHeapValueProbeOUT NVARCHAR(MAX) = NULL OUTPUT  --| Хим. анализ террикона - результата объединения.
+	@nHeapWeightOUT	         DECIMAL(9,3)  = NULL OUTPUT, --| Масса террикона - результата объединения.
+	@xHeapValueProbeOUT      NVARCHAR(MAX) = NULL OUTPUT  --| Хим. анализ террикона - результата объединения.
 )
 AS
 BEGIN TRY
@@ -62,34 +62,34 @@ BEGIN TRY
 		--| Таблица предназначена для временного хранения масс и хим. анализа исходных терриконов.
 		CREATE TABLE #tData_1  
 		(		
-			nRowNumber		INT,		  --| Порядковый номер строки (необходимо для работы цикла, см. ниже).	 
-			nWeight			DECIMAL(9,3), --| Вес исходного террикона.
-			xValueProbe		XML			  --| Хим. анализ исходного террикона.
+			nRowNumber	INT,          --| Порядковый номер строки (необходимо для работы цикла, см. ниже).	 
+			nWeight		DECIMAL(9,3), --| Вес исходного террикона.
+			xValueProbe	XML	      --| Хим. анализ исходного террикона.
 		)
 		
 		--| Наполнение временной таблицы #tData_1.
-		INSERT INTO	#tData_1
+		INSERT INTO #tData_1
 		SELECT  
 			ROW_NUMBER() OVER (ORDER BY ISNULL(nHeapId,1)) AS nRowNumber, --| Порядковый номер строки.
-			nWeight,	 --| Вес исходного террикона.
+			nWeight,     --| Вес исходного террикона.
 			xValueProbe  --| Хим. анализ исходного террикона.
 		FROM dbo.macHeap ms
 		WHERE ms.nGUID IN (SELECT nGUID FROM #tGUIDsTable_2)
 	 	 --| У исходных терриконов обязательно должны быть:
-	 	 AND (ISNULL(nWeight,0) > 0)									--| 1) положительный вес;
+	 	 AND (ISNULL(nWeight,0) > 0)					--| 1) положительный вес;
 		 AND (LEN(ISNULL(CONVERT(NVARCHAR(MAX), xValueProbe),'')) > 30) --| 2) наличие хим. анализа.
 	    
 	    --SELECT * FROM #tData_1
 		 
-		DECLARE	@nHeapWeight DECIMAL(9,3) = NULL  --| Масса результирующего террикона.
-		DECLARE	@xHeapValueProbe XML	   = NULL  --| Средневзвешенный хим. анализ результ. террикона.
-		DECLARE	@nWeight	  DECIMAL(9,3) = NULL  --| Вес одного из исходных терриконов.
-		DECLARE	@xValueProbe  XML		   = NULL  --| Хим. анализ одного из исходных терриконов.
-		DECLARE	@nTotalWeight DECIMAL(9,3) = NULL  --| Промежут. масса террикона + вес одного из исходных тер.
-		DECLARE	@rX			  dbo.IdFloat2RowTable --| Средневзвешенный хим. анализ результирующего террикона.
-		DECLARE	@nRowNumber   INT --| Порядковый номер строки (необходимо для работы цикла, см. ниже).	
-		DECLARE	@nCount       INT --| Количество итераций цикла = количеству исходных терриконов.
-		DECLARE	@nRowCount    INT --| Счётчик итераций цикла, инкрементируется от 0 до @nCount.
+		DECLARE	@nHeapWeight     DECIMAL(9,3) = NULL  --| Масса результирующего террикона.
+		DECLARE	@xHeapValueProbe XML	      = NULL  --| Средневзвешенный хим. анализ результ. террикона.
+		DECLARE	@nWeight	 DECIMAL(9,3) = NULL  --| Вес одного из исходных терриконов.
+		DECLARE	@xValueProbe     XML	      = NULL  --| Хим. анализ одного из исходных терриконов.
+		DECLARE	@nTotalWeight    DECIMAL(9,3) = NULL  --| Промежут. масса террикона + вес одного из исходных тер.
+		DECLARE	@rX		 dbo.IdFloat2RowTable --| Средневзвешенный хим. анализ результирующего террикона.
+		DECLARE	@nRowNumber      INT --| Порядковый номер строки (необходимо для работы цикла, см. ниже).	
+		DECLARE	@nCount          INT --| Количество итераций цикла = количеству исходных терриконов.
+		DECLARE	@nRowCount       INT --| Счётчик итераций цикла, инкрементируется от 0 до @nCount.
 		
 		
 		 --| Подготовка к циклу.
@@ -101,15 +101,15 @@ BEGIN TRY
 		
 		--| Цикл по исходным терриконам.
 		--| В цикле рассчитываются:
-		--|		- средневзвешенный хим. анализ результирующего террикона;
-		--|		- масса результирующего террикона;
+		--|	- средневзвешенный хим. анализ результирующего террикона;
+		--|	- масса результирующего террикона;
 		WHILE (SELECT TOP(1)1 FROM #tData_1) IS NOT NULL
 		AND @nRowCount < @nCount 
 		BEGIN --**
 
 			SELECT TOP(1)
 				@nRowNumber  = nRowNumber, --| Порядковый номер строки (по нему будет происходить удаление).
-				@nWeight	 = nWeight,	   --| Вес одного из исходных терриконов.
+				@nWeight     = nWeight,	   --| Вес одного из исходных терриконов.
 				@xValueProbe = xValueProbe --| Хим. анализ одного из исходных терриконов.
 			FROM #tData_1 
 			
@@ -128,7 +128,7 @@ BEGIN TRY
 				;WITH cte AS
 				(
 					SELECT 
-					t.c.query('./nParametrId').value('.','int') AS nParametrId,
+					t.c.query('./nParametrId').value('.','int')      AS nParametrId,
 					t.c.query('./cValueParametr').value('.','FLOAT') AS nValueParametr
 					FROM @xValueProbe.nodes('/ProbeParameters/cResultProbe ') AS t(c)
 					WHERE NULLIF(t.c.query('./cValueParametr').value('.','varchar(300)'),'') IS NOT NULL
@@ -179,12 +179,12 @@ BEGIN TRY
 			END --** Конец цикла по исходным(объединяемым) терриконам.
 
 		DECLARE @nMaterialTypeId INT --| ID типа материала, необходим для сортировки хим. анализа террикона,
-									 --| согласно порядка следования хим. компонентов (см. ниже).
+					     --| согласно порядка следования хим. компонентов (см. ниже).
 		
 		--| Получение ID типа материала террикона.
 		SET @nMaterialTypeId = (SELECT t.nMaterialTypeId 
-								FROM dbo.dictMat t 
-								WHERE t.nMaterialId = dbo.GetFirstMatParent(@nMaterialIdIn))	
+					FROM dbo.dictMat t 
+					WHERE t.nMaterialId = dbo.GetFirstMatParent(@nMaterialIdIn))	
 		
 		--| Обработка выходных параметров.
 		--| -------------------------------------------------------
@@ -193,22 +193,22 @@ BEGIN TRY
 		
 		--| Хим. анализ террикона-результата объединения.	
 		--| Сортировка хим. анализа террикона согласно порядка следования хим. компонентов:
-			--| 1 извлечение хим. анализа из XML в таблицу,
-			--| 2 сортировка хим. компонентов.
-			--| 3 преобразование из таблицы в строковую переменную со структурой XML.
+		--| 1 извлечение хим. анализа из XML в таблицу,
+		--| 2 сортировка хим. компонентов.
+		--| 3 преобразование из таблицы в строковую переменную со структурой XML.
 		SET	@xHeapValueProbeOUT = 
 				CONVERT(NVARCHAR(MAX), ISNULL(
-											   (SELECT 
-													t.c.query('./nParametrId').value('.','INT') AS nParametrId,
-													mp.cNameParametr,
-													CONVERT( DECIMAL(9,3), t.c.query('./cValueParametr').value('.','FLOAT')) AS cValueParametr
-												FROM @xHeapValueProbe.nodes('/ProbeParameters/cResultProbe ') AS t(c)
-												INNER JOIN dbo.dctMatParam	 AS mp  ON mp.nParametrId = t.c.query('./nParametrId').value('.','INT')
-												LEFT  JOIN dbo.dctMatParamLink AS mpl ON (mpl.nParametrId = mp.nParametrId) AND (mpl.nMaterialTypeId = @nMaterialTypeId)
-												WHERE NULLIF(t.c.query('./cValueParametr').value('.','NVARCHAR(300)'),'') IS NOT NULL
-												ORDER BY ISNULL(mpl.nSequence, 1024)
-												FOR XML PATH(N'cResultProbe'), ROOT(N'ProbeParameters'))
-												,''))
+								   (SELECT 
+										t.c.query('./nParametrId').value('.','INT') AS nParametrId,
+										mp.cNameParametr,
+										CONVERT( DECIMAL(9,3), t.c.query('./cValueParametr').value('.','FLOAT')) AS cValueParametr
+									FROM @xHeapValueProbe.nodes('/ProbeParameters/cResultProbe ') AS t(c)
+									INNER JOIN dbo.dctMatParam     AS mp  ON mp.nParametrId = t.c.query('./nParametrId').value('.','INT')
+									LEFT  JOIN dbo.dctMatParamLink AS mpl ON (mpl.nParametrId = mp.nParametrId) AND (mpl.nMaterialTypeId = @nMaterialTypeId)
+									WHERE NULLIF(t.c.query('./cValueParametr').value('.','NVARCHAR(300)'),'') IS NOT NULL
+									ORDER BY ISNULL(mpl.nSequence, 1024)
+									FOR XML PATH(N'cResultProbe'), ROOT(N'ProbeParameters'))
+									,''))
 										  
 		--SELECT 
 		--	@nHeapWeight, 
@@ -224,6 +224,7 @@ BEGIN TRY
 	
 END TRY
 BEGIN CATCH
+
 		--| Удаление временных таблиц #tData_1, #tGUIDsTable_2.
 		IF OBJECT_ID(N'tempdb..#tData_1', N'U') IS NOT NULL 
 			DROP TABLE #tData_1	
@@ -237,9 +238,7 @@ BEGIN CATCH
 		--> Процедура логирование ошибок
 		EXEC dbo.Log_Error @cUserErrMessage
 		RETURN (50000 + ISNULL(ERROR_NUMBER(),0))
+		
 END CATCH							
-
-
-
-
 GO
+
