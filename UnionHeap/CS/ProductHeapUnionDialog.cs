@@ -170,8 +170,8 @@ namespace otk_interunion
 		}
             }
 			
-			// Выбор материала из справочника.
-			// (! будет время  - выполнить рефакторинг загрузки справочников).
+	    // Выбор материала из справочника.
+	    // (! будет время  - выполнить рефакторинг загрузки справочников).
             private void itbMaterial_ButtonClick(object sender, EventArgs e)
             {
                 try
@@ -206,8 +206,8 @@ namespace otk_interunion
 		}	
             }
 			
-			// Выбор фракции из справочника.
-			// (! будет время  - выполнить рефакторинг загрузки справочников).
+	    // Выбор фракции из справочника.
+	    // (! будет время  - выполнить рефакторинг загрузки справочников).
             private void itbFraction_ButtonClick(object sender, EventArgs e)
             {
 		try
@@ -278,7 +278,7 @@ namespace otk_interunion
 		}
             }
 			
-			// Объединение терриконов.
+	    // Объединение терриконов.
             private void btOK_Click(object sender, EventArgs e)
             {
                 try
@@ -290,7 +290,7 @@ namespace otk_interunion
 
 					// Формирование списка параметров результирующего террикона
 					// (в данный террикон будет произведено слияние).
-					NameHeap = tbName.Text.Trim();             // Название террикона;
+					NameHeap = tbName.Text.Trim();                // Название террикона;
 					MaterialId = (int?)itbMaterial.SelectedValue; // материал;
 					FractionId = (int?)itbFraction.SelectedValue; // фракция;
 					PlaceId = (int?)itbPlace.SelectedValue;       // месторасположение;
@@ -463,8 +463,8 @@ namespace otk_interunion
 
             /// <summary>
             /// Проверка: 
-			///  	1)количества выбранных терриконов (не менее 2-х), 
-			///		2)наличие терриконов с отрицательной массой.
+	    ///  1) количества выбранных терриконов (не менее 2-х), 
+	    ///	 2) наличие терриконов с отрицательной массой.
             /// </summary>
             private bool Check()
             {
@@ -546,7 +546,7 @@ namespace otk_interunion
 
             /// <summary>
             /// 1) Принудительная установка checkbox'а для строки грида с входным терриконом.
-			/// 2) Динамическое формирование примечания результирующего террикона.
+	    /// 2) Динамическое формирование примечания результирующего террикона.
             /// </summary>
             private void RequiredProductHeapChecked()
             {
@@ -579,8 +579,8 @@ namespace otk_interunion
 							// добавляем его в примечание.
 							if (row.Field<int>("nHeapId").Equals(ids[i]))
 								cNote += "\""
-								   + row.Field<string>("cNameUnit") + "\\"      // название площадки;
-								   + row.Field<string>("cNameHeap") + "\"("     // название террикона;
+								   + row.Field<string>("cNameUnit") + "\\"  // название площадки;
+								   + row.Field<string>("cNameHeap") + "\"(" // название террикона;
 								   + row.Field<string>("cNameMaterial") + ", фр.:" // материал;
 								   + row.Field<string>("cNameFraction").ToLower() + ", масса:"// фракция;
 								   + nWeight.ToString() + " т.)"  // масса террикона.
@@ -691,7 +691,6 @@ namespace otk_interunion
 								numb = numb + str[i];
 							else break;
 					}
-					
 					
 					// Шаблоны с номером склада.
 					// Если номер склада был получен – используем его для создания шаблонов.
