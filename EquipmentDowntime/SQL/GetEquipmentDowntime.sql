@@ -53,19 +53,19 @@ BEGIN TRY
 			md.dDateCreate    --| Дата остановки /запуска оборудования.
 		FROM mcMeltDetail AS md
 		--| Добавил.
-        LEFT OUTER JOIN
-             (
-		    --| Ищем последний запуск перед датой @dDateBeginIn по каждой печи.
-                    SELECT
-                           nEquipmentId,
-                           MAX(dDateCreate) AS dDateBegin
-                    FROM dbo.mcMeltDetail
-                    WHERE cCodeTag = 'Run' 
-		     AND nValueTag=1 
-		     AND dDateCreate < @dDateBeginIn
-                    GROUP BY nEquipmentId
-                    
-             ) lr ON lr.nEquipmentId = md.nEquipmentId
+		LEFT OUTER JOIN
+		     (
+			    --| Ищем последний запуск перед датой @dDateBeginIn по каждой печи.
+		            SELECT
+		                   nEquipmentId,
+		                   MAX(dDateCreate) AS dDateBegin
+		            FROM dbo.mcMeltDetail
+		            WHERE cCodeTag = 'Run' 
+			     AND nValueTag=1 
+			     AND dDateCreate < @dDateBeginIn
+		            GROUP BY nEquipmentId
+		            
+		     ) lr ON lr.nEquipmentId = md.nEquipmentId
 	
 		WHERE dDateCreate BETWEEN ISNULL(lr.dDateBegin, @dDateBeginIn) AND @dDateEndIn
 		  AND cCodeTag = 'Run'
