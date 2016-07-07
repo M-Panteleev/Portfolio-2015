@@ -83,72 +83,72 @@ BEGIN TRY
 			nMeltDetailEndId   INT	     --| Идентификатор записи "Запуск печи" (окончание простоя).	
 		)
 		
-	--| Наполнение таблицы #tData2 данными из таблицы #tData1 по условию.
-	--| Выборка записей для вставки осуществляется по принципу:
-	--| Для каждой записи Run = 0 ищется первая запись Run = 1, 
-	--| у которой дата создания больше текущей Run = 0.
-	--| Например:
-	--| если в таблице #tData1 есть записи вида:
-	--| ID1 | Run | 0 | 05.11.2014 01:00  
-	--| ID2 | Run | 0 | 05.11.2014 02:00  
-	--| ID3 | Run | 0 | 05.11.2014 03:00  
-	--| ID4 | Run | 1 | 05.11.2014 04:00
-	--| В таблицу #tData2 попадут 3 строки ID1, ID2, ID3 для каждой из которых,
-	--| время окончания простоя будет ID4, в финальной выборке строки ID2, ID3 будут исключены.
-	INSERT INTO #tData2
-	SELECT 
-		td1.nEquipmentId,	         --| Идентификатор печи.
-		td1.dDateCreate   AS dIdleBegin, --| Дата начала простоя.
-    		--| Если в подзапросе «ca» не обнаружено ни одной записи, 
-		--| свидетельствующей об окончании простоя, этой датой по умолчанию будет @dDateEndIn.
-		ISNULL(ca.dDateCreate,@dDateEndIn) AS dIdleEnd,	--| Дата окончания простоя.
-		td1.nMeltdetailId AS nMeltDetailBeginId, 	--| Идентификатор записи "Остановка печи" (начало простоя).	
-		ca.nMeltdetailId  AS nMeltDetailEndId		--| Идентификатор записи "Запуск печи" (окончание простоя).	
-	FROM #tData1 AS td1	
-	--| Поиск первой попавшейся записи с типом Run = 1 (окончание простоя)
-	--| у которой дата создания больше текущей (Run = 0) из #tData1.
-	OUTER APPLY(
-			 SELECT TOP(1)
-				td2.nMeltdetailId,  --| Идентификатор записи "Запуск печи" (окончание простоя).	
-				td2.dDateCreate     --| Дата окончания простоя.
-			 FROM #tData1 AS td2	
-			 WHERE 
-			   --| Проверка на то, что значение td2.nValueTag 
-			   --| имеет тип "Запуск печи" (окончание простоя).	
-			   --| Можно было бы записать так "td2.nValueTag = 1".
-			   td2.nValueTag  <> td1.nValueTag
-			   --| Дата окончания простоя должна быть больше даты начала простоя.
-			   AND td2.dDateCreate  > td1.dDateCreate
-			   --| Записи об остановке и запуске относятся к одному и тому же оборудованию.
-			   AND td2.nEquipmentId = td1.nEquipmentId
-			  ORDER BY td2.dDateCreate ASC
-		    ) ca
-	WHERE td1.nValueTag = 0
-
-	--| Финальная выборка с исключением ненужных записей.
-	--| Например:
-	--| если в таблицу #tData2 попали записи ID1,ID2,ID3 из выборки:
-	--| ID1 | Run | 0 | 05.11.2014 01:00  
-	--| ID2 | Run | 0 | 05.11.2014 02:00  
-	--| ID3 | Run | 0 | 05.11.2014 03:00  
-	--| ID4 | Run | 1 | 05.11.2014 04:00
-	--| у каждой из которых временем окончания простоя является запись ID4, тогда,
-	--| все кроме ID1 будут исключены из финальной выборки условием 
-	--| MIN(t.dIdleBegin) и GROUP BY для повторяющихся значений.
-	SELECT 
-		t.nEquipmentId,					      --| Идентификатор печи.
-		MIN(t.dIdleBegin) 	       AS dIdleBegin,	      --| Дата начала простоя.
-		ISNULL(t.dIdleEnd,@dDateEndIn) AS dIdleEnd,	      --| Дата окончания простоя.
-		MIN(t.nMeltDetailBeginId)      AS nMeltDetailBeginId, --| Идентификатор записи "Остановка печи" (начало простоя).
-		--| Для простоев у которых датой окончания простоя является @dDateEndIn - 
-		--| Id записи окончания простоя отсутствует, поэтому передаём 0.
-		ISNULL(t.nMeltDetailEndId,0) AS nMeltDetailEndId,  --| Идентификатор записи "Запуск печи" (окончание простоя).	
-		--| Получение Id материала.
-		ISNULL((SELECT TOP 1 mm.nMaterialId FROM macMelt mm WHERE mm.nEquipmentFurnId = t.nEquipmentId AND mm.dDateMelt >= t.dIdleEnd ORDER BY mm.dDateMelt),0) AS nMaterialId
-	FROM #tData2 AS t
-	GROUP BY t.nEquipmentId, t.dIdleEnd,t.nMeltDetailEndId
-	ORDER BY dIdleBegin	
+		--| Наполнение таблицы #tData2 данными из таблицы #tData1 по условию.
+		--| Выборка записей для вставки осуществляется по принципу:
+		--| Для каждой записи Run = 0 ищется первая запись Run = 1, 
+		--| у которой дата создания больше текущей Run = 0.
+		--| Например:
+		--| если в таблице #tData1 есть записи вида:
+		--| ID1 | Run | 0 | 05.11.2014 01:00  
+		--| ID2 | Run | 0 | 05.11.2014 02:00  
+		--| ID3 | Run | 0 | 05.11.2014 03:00  
+		--| ID4 | Run | 1 | 05.11.2014 04:00
+		--| В таблицу #tData2 попадут 3 строки ID1, ID2, ID3 для каждой из которых,
+		--| время окончания простоя будет ID4, в финальной выборке строки ID2, ID3 будут исключены.
+		INSERT INTO #tData2
+		SELECT 
+			td1.nEquipmentId,	         --| Идентификатор печи.
+			td1.dDateCreate   AS dIdleBegin, --| Дата начала простоя.
+		    	--| Если в подзапросе «ca» не обнаружено ни одной записи, 
+			--| свидетельствующей об окончании простоя, этой датой по умолчанию будет @dDateEndIn.
+			ISNULL(ca.dDateCreate,@dDateEndIn) AS dIdleEnd,	--| Дата окончания простоя.
+			td1.nMeltdetailId AS nMeltDetailBeginId, 	--| Идентификатор записи "Остановка печи" (начало простоя).	
+			ca.nMeltdetailId  AS nMeltDetailEndId		--| Идентификатор записи "Запуск печи" (окончание простоя).	
+		FROM #tData1 AS td1	
+		--| Поиск первой попавшейся записи с типом Run = 1 (окончание простоя)
+		--| у которой дата создания больше текущей (Run = 0) из #tData1.
+		OUTER APPLY(
+				 SELECT TOP(1)
+					td2.nMeltdetailId,  --| Идентификатор записи "Запуск печи" (окончание простоя).	
+					td2.dDateCreate     --| Дата окончания простоя.
+				 FROM #tData1 AS td2	
+				 WHERE 
+				   --| Проверка на то, что значение td2.nValueTag 
+				   --| имеет тип "Запуск печи" (окончание простоя).	
+				   --| Можно было бы записать так "td2.nValueTag = 1".
+				   td2.nValueTag  <> td1.nValueTag
+				   --| Дата окончания простоя должна быть больше даты начала простоя.
+				   AND td2.dDateCreate  > td1.dDateCreate
+				   --| Записи об остановке и запуске относятся к одному и тому же оборудованию.
+				   AND td2.nEquipmentId = td1.nEquipmentId
+				  ORDER BY td2.dDateCreate ASC
+			    ) ca
+		WHERE td1.nValueTag = 0
 		
+		--| Финальная выборка с исключением ненужных записей.
+		--| Например:
+		--| если в таблицу #tData2 попали записи ID1,ID2,ID3 из выборки:
+		--| ID1 | Run | 0 | 05.11.2014 01:00  
+		--| ID2 | Run | 0 | 05.11.2014 02:00  
+		--| ID3 | Run | 0 | 05.11.2014 03:00  
+		--| ID4 | Run | 1 | 05.11.2014 04:00
+		--| у каждой из которых временем окончания простоя является запись ID4, тогда,
+		--| все кроме ID1 будут исключены из финальной выборки условием 
+		--| MIN(t.dIdleBegin) и GROUP BY для повторяющихся значений.
+		SELECT 
+			t.nEquipmentId,					      --| Идентификатор печи.
+			MIN(t.dIdleBegin) 	       AS dIdleBegin,	      --| Дата начала простоя.
+			ISNULL(t.dIdleEnd,@dDateEndIn) AS dIdleEnd,	      --| Дата окончания простоя.
+			MIN(t.nMeltDetailBeginId)      AS nMeltDetailBeginId, --| Идентификатор записи "Остановка печи" (начало простоя).
+			--| Для простоев у которых датой окончания простоя является @dDateEndIn - 
+			--| Id записи окончания простоя отсутствует, поэтому передаём 0.
+			ISNULL(t.nMeltDetailEndId,0) AS nMeltDetailEndId,  --| Идентификатор записи "Запуск печи" (окончание простоя).	
+			--| Получение Id материала.
+			ISNULL((SELECT TOP 1 mm.nMaterialId FROM macMelt mm WHERE mm.nEquipmentFurnId = t.nEquipmentId AND mm.dDateMelt >= t.dIdleEnd ORDER BY mm.dDateMelt),0) AS nMaterialId
+		FROM #tData2 AS t
+		GROUP BY t.nEquipmentId, t.dIdleEnd,t.nMeltDetailEndId
+		ORDER BY dIdleBegin	
+			
 		--| Удаление временных таблиц #tData1, #tData2, #tData3, #tData4.
 		IF OBJECT_ID(N'tempdb..#tData1', N'U') IS NOT NULL 
 			DROP TABLE #tData1	
