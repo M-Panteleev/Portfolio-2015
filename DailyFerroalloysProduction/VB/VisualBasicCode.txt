@@ -1,0 +1,112 @@
+'Автор: Пантелеев М.Ю.
+'Дата: 22.09.2015г.
+
+'Несколько функций на Visual Basic используемых внутри отчёта (см. файл "DailyFerroalloysProduction.rdl").
+
+
+'*************************************************
+'  Автор: Пантелеев М.Ю.
+'  Дата: 14.09.2015г.
+'  Получение итога по заданному полю 
+'  cреди итоговых записей печей и сплавов 
+'  (записи с марками продукции пропускаются)
+'*************************************************
+Public Function TotalByField( ByVal nUnitIdIn As Integer, nMarkIn As Integer, cNameMaterialIn As String, nValueIn As Decimal, nRuleIn As Integer ) As Decimal
+
+'Если это итоговая запись по печи и сплаву (не запись с маркой) и
+'это не ЦПШл (для получения итога без учёта ЦПШл)
+If (nMarkIn  = 0 And nUnitIdIn <> 71) Then 
+
+  'Получаем название продукции в нижнем регистре.
+  Dim cNameMaterial As String =  LCase( cNameMaterialIn )
+  'Признак нахождения искомого текста.
+  Dim bIsFound As Boolean = false
+
+  'Если входная продукция это переплав или шлак – выставляется 
+  'положительный статус, иначе отрицательный.
+  If ( InStr( cNameMaterial , "переплав") > 0 Or InStr( cNameMaterial , "шлак") > 0) Then 
+        bIsFound = true
+  Else 
+        bIsFound = false
+  End If
+ 
+  'Выполнение операций согласно указанного правила 
+  '(см. входной параметр nRuleIn )
+  Select Case nRuleIn 
+
+    'Правило 1.
+    'Если входное значение принадлежит переплаву или шлаковому выпуску –
+    'происходит его исключение из расчёта (вместо него возвращается ноль).   
+    'Используется там, где в итог по сплаву не должны входить переплавы и
+    'шлаковые выпуски.
+    Case 1
+        If ( bIsFound = false ) Then Return nValueIn Else Return 0
+    
+    'Правило 2.
+    'Входное значение любого сплава и марки учувствует в расчёте.
+    'Используется при получении суммарного расхода эл. энергии на сплав 
+    '( эл. эн. на марочные выпуски + РВ + шлак, всё что было затрачено).
+    Case 2
+        Return nValueIn
+
+  End Select
+
+End If
+End Function
+
+'*************************************************
+'  Автор: Пантелеев М.Ю.
+'  Дата: 17.09.2015г.
+'  Получение итога по заданному полю печи (функция обёртка).
+'*************************************************
+Public Function TotalByFieldFurn( ByVal nMarkIn As Integer, nValueIn As Decimal) As Decimal
+        Return TotalByField( 0, nMarkIn, "", nValueIn, 1 ) 
+End Function
+
+'*************************************************
+'  Автор: Пантелеев М.Ю.
+'  Дата: 17.09.2015г.
+'  Получение итога по заданному полю цеха (функция обёртка).
+'*************************************************
+Public Function TotalByFieldUnit(ByVal nMarkIn As Integer, cNameMaterialIn As String, nValueIn As Decimal, nRuleIn As Integer) As Decimal
+        Return TotalByField( 0, nMarkIn, cNameMaterialIn, nValueIn, nRuleIn ) 
+End Function
+
+'*************************************************
+' Автор: Пантелеев М.Ю.
+' Дата: 14.08.2015г.
+' Возвращает пустое значение если входной параметр = 0.
+'*************************************************
+Public Function ReturnNothingIfZero(ByVal d As Decimal) As String
+   If (d = 0) Then
+      Return Nothing
+   Else
+      Return Round(d).ToString() 
+   End If
+End Function
+
+'*************************************************
+'  Автор: Пантелеев М.Ю.
+'  Дата: 16.09.2015г.
+'  Условие фильтрации записей в группе "Alloy".
+'*************************************************
+Public Function MyVisibleRule( ByVal nMarkIn As Integer, cNameMaterialIn As String, nRuleIn As Integer ) As Integer
+
+'Если это итоговая запись по печи и сплаву (не запись с маркой).
+If (nMarkIn  = 0) Then
+  
+  'Получаем название продукции в нижнем регистре.
+  Dim cNameMaterial As String =  LCase( cNameMaterialIn )
+
+  'Если строка с названием материала содержит 
+  'подстроку "шлак"  - возвращается 1 иначе 0.
+  If ( InStr( cNameMaterial , "шлак") > 0) Then 
+        Return 1
+  Else 
+        Return 0 
+  End If
+
+End If
+End Function
+
+
